@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-inner">
+        <div class="hero-card">
+            <div class="brand-inline">
+                <img src="{{ url_for('static', filename='images/mindspace.png') }}" alt="MindSpace" class="brand-logo" />
+                <span class="brand-name">MindSpace</span>
+            </div>
+            <h1 class="hero-title">Find calm, track your mood, and grow daily</h1>
+            <p class="hero-subtitle">Your personal mental wellness companion — mindful tracking, insights, and gentle reminders.</p>
+            <div class="hero-ctas">
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">Go to Dashboard</a>
+                    <a href="{{ url_for('add_entry') }}" class="btn btn-outline-primary btn-lg">Add Entry</a>
+                {% else %}
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Get Started</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">Login</a>
+                {% endif %}
+            </div>
+        </div>`
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-face-smile"></i></div>
+                <h3>Track Your Mood</h3>
+                <p>Log emotions and notes daily to spot trends and triggers.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Analytics & Insights</h3>
+                <p>Beautiful charts and personalized insights to guide your journey.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-bell"></i></div>
+                <h3>Smart Reminders</h3>
+                <p>Gentle notifications to help you build a mindful routine.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

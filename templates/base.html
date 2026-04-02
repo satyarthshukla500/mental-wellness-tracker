@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MindSpace{% endblock %}</title>
+    
+    <!-- Google Fonts: Poppins (headings) and Open Sans (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body{% if request.endpoint == 'dashboard' %} class="dashboard-page"{% elif request.endpoint == 'home' %} class="home-page"{% elif request.endpoint == 'login' %} class="login-page"{% elif request.endpoint == 'register' %} class="register-page"{% elif request.endpoint == 'add_entry' %} class="add-entry-page"{% elif request.endpoint == 'reminders' %} class="reminders-page"{% elif request.endpoint == 'profile' %} class="profile-page"{% elif request.endpoint == 'about' %} class="about-page"{% elif request.endpoint == 'contact' %} class="contact-page"{% elif request.endpoint == 'change_password' %} class="change-password-page"{% endif %}>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="{{ url_for('home') }}" class="sidebar-brand">
+                <img src="{{ url_for('static', filename='images/mindspace.png') }}" alt="MindSpace" class="brand-logo me-2" id="logoImage" />
+                <span>MindSpace</span>
+            </a>
+        </div>
+        
+        <div class="sidebar-content">
+            <ul class="sidebar-nav">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">
+                        <i class="fas fa-home me-2"></i>
+                        Home
+                    </a>
+                </li>
+                {% if session.get('user_id') %}
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}" href="{{ url_for('profile') }}">
+                        <i class="fas fa-user me-2"></i>
+                        Profile
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'reminders' %}active{% endif %}" href="{{ url_for('reminders') }}">
+                        <i class="fas fa-bell me-2"></i>
+                        Reminders
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'about' %}active{% endif %}" href="{{ url_for('about') }}">
+                        <i class="fas fa-info-circle me-2"></i>
+                        About Us
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'contact' %}active{% endif %}" href="{{ url_for('contact') }}">
+                        <i class="fas fa-headset me-2"></i>
+                        Contact & Support
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('logout') }}">
+                        <i class="fas fa-sign-out-alt me-2"></i>
+                        Logout
+                    </a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('login') }}">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        Login
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('register') }}">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Register
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'about' %}active{% endif %}" href="{{ url_for('about') }}">
+                        <i class="fas fa-info-circle me-2"></i>
+                        About Us
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'contact' %}active{% endif %}" href="{{ url_for('contact') }}">
+                        <i class="fas fa-headset me-2"></i>
+                        Contact & Support
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Bar for Mobile -->
+        <div class="top-bar d-lg-none">
+            <button class="btn btn-outline-primary" id="mobileMenuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <span class="top-bar-title">MindSpace</span>
+        </div>
+
+        <!-- Page Content -->
+        <div class="content-wrapper">
+            <!-- Flash messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">
+                                {{ message }}
+                                <button type="button" class="flash-close" aria-label="Close">&times;</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <!-- Page Content -->
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Logo Modal -->
+    <div id="logoModal" class="logo-modal">
+        <div class="logo-modal-content">
+            <button class="logo-modal-close-btn" onclick="closeLogoModal()" aria-label="Close modal">
+                <i class="fas fa-times"></i>
+            </button>
+            <img src="{{ url_for('static', filename='images/mindspace.png') }}" alt="MindSpace" class="logo-modal-logo" />
+            <h2 class="logo-modal-title">MindSpace</h2>
+            <p class="logo-modal-tagline">Your Calm Companion</p>
+            <button class="logo-modal-close" onclick="closeLogoModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Sidebar Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const sidebar = document.getElementById('sidebar');
+
+            // Mobile menu toggle (only for mobile)
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                });
+            }
+
+            // Close mobile sidebar when clicking outside
+            document.addEventListener('click', function(event) {
+                if (window.innerWidth < 992) {
+                    if (!sidebar.contains(event.target) && !mobileMenuToggle.contains(event.target)) {
+                        sidebar.classList.remove('show');
+                    }
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 992) {
+                    sidebar.classList.remove('show');
+                }
+            });
+
+            // Logo modal functionality
+            const logoImage = document.getElementById('logoImage');
+            const logoModal = document.getElementById('logoModal');
+            
+            if (logoImage && logoModal) {
+                logoImage.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    logoModal.classList.add('show');
+                });
+            }
+        });
+
+        // Logo modal functions
+        function closeLogoModal() {
+            const logoModal = document.getElementById('logoModal');
+            if (logoModal) {
+                logoModal.classList.remove('show');
+            }
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(e) {
+            const logoModal = document.getElementById('logoModal');
+            if (logoModal && logoModal.classList.contains('show')) {
+                if (e.target === logoModal) {
+                    closeLogoModal();
+                }
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeLogoModal();
+            }
+        });
+    </script>
+    
+    <!-- Flash Message Auto-Dismiss Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            
+            flashMessages.forEach(function(message) {
+                // Auto-dismiss after 5 seconds
+                const autoClose = setTimeout(function() {
+                    message.style.transition = 'opacity 0.5s ease-out';
+                    message.style.opacity = '0';
+                    setTimeout(() => message.remove(), 500);
+                }, 5000);
+                
+                // Manual close button
+                const closeBtn = message.querySelector('.flash-close');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', function() {
+                        clearTimeout(autoClose);
+                        message.style.transition = 'opacity 0.3s ease-out';
+                        message.style.opacity = '0';
+                        setTimeout(() => message.remove(), 300);
+                    });
+                }
+                
+                // Click anywhere on message to dismiss
+                message.style.cursor = 'pointer';
+                message.addEventListener('click', function(e) {
+                    if (!closeBtn || e.target !== closeBtn) {
+                        clearTimeout(autoClose);
+                        message.style.transition = 'opacity 0.3s ease-out';
+                        message.style.opacity = '0';
+                        setTimeout(() => message.remove(), 300);
+                    }
+                });
+            });
+        });
+    </script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

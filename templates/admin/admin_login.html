@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - MindSpace</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Admin CSS -->
+    <link href="{{ url_for('static', filename='css/admin_style.css') }}" rel="stylesheet">
+    
+    <style>
+        /* Glassmorphism Admin Login Card */
+        .admin-card {
+            background: rgba(255, 255, 255, 0.16);
+            border-radius: 22px;
+            box-shadow: 0 4px 32px rgba(0,0,0,0.15);
+            padding: 2.5rem 2rem;
+            backdrop-filter: blur(10px);
+            border: 1.5px solid rgba(255,255,255,0.22);
+            max-width: 420px;
+            margin: 3rem auto;
+        }
+
+        /* Password Input Wrapper */
+        .input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .input-wrapper input[type="password"],
+        .input-wrapper input[type="text"] {
+            width: 100%;
+            padding-right: 44px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 14px;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            font-size: 1.15rem;
+            color: #515151;
+            transition: color 0.3s ease;
+        }
+
+        .toggle-password:hover {
+            color: #4a90e2;
+        }
+
+        .lockout-message {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(238, 90, 111, 0.3);
+        }
+
+        .lockout-message h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .lockout-message p {
+            color: rgba(255, 255, 255, 0.9);
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .warning-message {
+            background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(255, 167, 38, 0.3);
+        }
+
+        .form-control:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-admin:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body class="admin-page admin-login-bg">
+    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;">
+        <div style="width: 100%; max-width: 400px;">
+            <div class="admin-card" style="text-align: center;">
+                <div style="margin-bottom: 30px;">
+                    <div style="font-size: 48px; color: #4a90e2; margin-bottom: 20px;">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h1 style="color: #1a1a1a; font-size: 28px; font-weight: 700; margin-bottom: 10px;">Admin Portal</h1>
+                    <p style="color: #666; font-size: 16px; margin: 0;">MindSpace Mental Wellness Tracker</p>
+                </div>
+                
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages" style="margin-bottom: 20px;">
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+                                    <i class="fas fa-{{ 'exclamation-triangle' if category == 'danger' else 'check-circle' if category == 'success' else 'info-circle' }}"></i>
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                {% if locked %}
+                    <div class="lockout-message">
+                        <h3>🔒 Account Temporarily Locked</h3>
+                        <p>Too many failed login attempts detected.</p>
+                        <p>Please try again in <strong>{{ minutes_remaining }} minutes</strong>.</p>
+                        <p style="margin-top: 10px; font-size: 12px;">This security measure protects against unauthorized access.</p>
+                    </div>
+                {% else %}
+                    {% if attempts_remaining is not none and attempts_remaining < 3 %}
+                        <div class="warning-message">
+                            ⚠️ {{ attempts_remaining }} attempt{{ "s" if attempts_remaining != 1 else "" }} remaining before lockout
+                        </div>
+                    {% endif %}
+                {% endif %}
+                
+                <form method="POST" style="text-align: left;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <div style="margin-bottom: 20px;">
+                        <label for="username" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-user" style="color: #4a90e2;"></i>
+                            Username
+                        </label>
+                        <input type="text" class="form-control" id="username" name="username" required 
+                               placeholder="Enter your username" {% if locked %}disabled{% endif %}>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label for="password" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-lock" style="color: #4a90e2;"></i>
+                            Password
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="password" class="form-control" id="password" name="password" required 
+                                   placeholder="Enter your password" {% if locked %}disabled{% endif %}>
+                            <button type="button" class="toggle-password" tabindex="-1" onclick="togglePassword(this)" {% if locked %}disabled{% endif %}>
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-admin" style="width: 100%; justify-content: center; margin-top: 10px;" {% if locked %}disabled{% endif %}>
+                        {% if locked %}
+                            <i class="fas fa-lock"></i>
+                            Locked
+                        {% else %}
+                            <i class="fas fa-sign-in-alt"></i>
+                            Sign In
+                        {% endif %}
+                    </button>
+                </form>
+                
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <a href="{{ url_for('home') }}" style="display: inline-flex; align-items: center; gap: 8px; color: #4a90e2; text-decoration: none; font-weight: 500; margin-bottom: 15px; padding: 8px 16px; border: 1px solid #4a90e2; border-radius: 6px; transition: all 0.3s ease;">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to App
+                    </a>
+                    <p style="color: #666; font-size: 14px; margin: 5px 0;">&copy; 2024 MindSpace. All rights reserved.</p>
+                    <p style="color: #4a90e2; font-size: 14px; font-weight: 600; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fas fa-shield-alt"></i>
+                        Secure Admin Access
+                        {% if not locked %}
+                            <br><small style="color: #999; font-weight: 400;">Protected by rate limiting</small>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Password visibility toggle function
+        function togglePassword(btn) {
+            const input = btn.previousElementSibling;
+            if (input.type === "password") {
+                input.type = "text";
+                btn.innerHTML = '<i class="fa fa-eye-slash"></i>';
+            } else {
+                input.type = "password";
+                btn.innerHTML = '<i class="fa fa-eye"></i>';
+            }
+        }
+        
+        // Auto-hide flash messages
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-20px)';
+                setTimeout(function() {
+                    alert.remove();
+                }, 300);
+            });
+        }, 5000);
+        
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!username || !password) {
+                e.preventDefault();
+                alert('Please fill in all fields.');
+                return;
+            }
+        });
+        
+    </script>
+</body>
+</html>

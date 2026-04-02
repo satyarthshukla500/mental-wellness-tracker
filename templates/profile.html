@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Mental Wellness Tracker{% endblock %}
+
+{% block content %}
+<div class="profile-header">
+    <div class="avatar-circle">
+        <i class="fas fa-user"></i>
+    </div>
+    <div class="profile-meta">
+        <h1 class="user-heading">{{ user.username }}</h1>
+        <p class="user-subheading">Mindful since {{ user.created_at.strftime('%B %Y') if user.created_at else '—' }}</p>
+    </div>
+</div>
+<div class="main-container">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="section-title mb-4">My Profile</h2>
+                
+                <!-- Flash messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for category, message in messages %}
+                                <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                <!-- User Information -->
+                <div class="card mb-4 glass-card">
+                    <div class="card-header">
+                        <h3 class="mb-0">👤 User Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Username:</strong> {{ user.username }}</p>
+                                <p><strong>Email:</strong> {{ user.email }}</p>
+                                <p><strong>Member since:</strong> {{ user.created_at.strftime('%B %d, %Y') if user.created_at else 'Unknown' }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Total Entries:</strong> {{ total_entries }}</p>
+                                <p><strong>Days Tracked:</strong> {{ days_with_entries }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                <!-- Statistics -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>{{ total_entries }}</h3>
+                        <p>Total Entries</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>{{ days_with_entries }}</h3>
+                        <p>Days Tracked</p>
+                    </div>
+                    {% if most_recent_entry %}
+                    <div class="stat-card">
+                        <h3>{{ most_recent_entry.mood }}</h3>
+                        <p>Latest Mood</p>
+                        <small>{{ most_recent_entry.created_at.strftime('%b %d, %Y') }}</small>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Profile Settings Form -->
+                <div class="card mb-4 glass-card">
+                    <div class="card-header">
+                        <h3 class="mb-0">Profile Settings</h3>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="form-group">
+                                {{ form.username.label(class="form-label") }}
+                                {{ form.username(class="form-control") }}
+                                {% if form.username.errors %}
+                                    <div class="text-danger mt-2">
+                                        {% for error in form.username.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                {{ form.email.label(class="form-label") }}
+                                {{ form.email(class="form-control") }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger mt-2">
+                                        {% for error in form.email.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Reminder Settings Info -->
+                {% if reminder_setting %}
+                <div class="card mb-4 glass-card">
+                    <div class="card-header">
+                        <h3 class="mb-0">📅 Reminder Settings</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if reminder_setting.enabled %}
+                            <p><strong>Status:</strong> <span class="text-success">Enabled</span></p>
+                            <p><strong>Time:</strong> {{ reminder_setting.reminder_time_utc or 'Not set' }}</p>
+                            <p><strong>Method:</strong> {{ 'Email' if reminder_setting.channel == 'email' else 'In-app notification' }}</p>
+                            <a href="{{ url_for('reminders') }}" class="btn btn-outline-primary">Update reminder settings</a>
+                        {% else %}
+                            <p><strong>Status:</strong> <span class="text-muted">Disabled</span></p>
+                            <a href="{{ url_for('reminders') }}" class="btn btn-primary">Set up reminders</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Account Management -->
+                <div class="card mb-4 glass-card">
+                    <div class="card-header">
+                        <h3 class="mb-0">Account Management</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">Manage your account settings and data.</p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{ url_for('change_password') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-key me-1"></i>Change Password
+                            </a>
+                            <a href="{{ url_for('export_csv') }}" class="btn btn-outline-info">
+                                <i class="fas fa-download me-1"></i>Download CSV
+                            </a>
+                            <a href="{{ url_for('delete_account') }}" class="btn btn-outline-danger">
+                                <i class="fas fa-trash me-1"></i>Delete Account
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <div class="text-center">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary me-2">← Back to Dashboard</a>
+                    <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">Home</a>
+                </div>
+            </div>
+        </div>
+</div>
+{% endblock %}

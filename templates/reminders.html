@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block title %}Reminder Settings - Mental Wellness Tracker{% endblock %}
+
+{% block content %}
+<div class="reminders-bg">
+        <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+                <div class="form-container glass-card">
+                    <h1 class="text-center mb-4">Reminder Settings</h1>
+                    
+                    <!-- Flash messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class="flash-messages">
+                                {% for category, message in messages %}
+                                    <div class="flash-message flash-{{ category }}">
+                                        {{ message }}
+                                        <button type="button" class="flash-close" aria-label="Close">&times;</button>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <!-- Information card -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">📅 Daily Wellness Reminders</h5>
+                            <p class="card-text">Set up daily in-app reminders to help you maintain consistent wellness tracking. You'll receive notifications directly in your dashboard.</p>
+                            
+                            <!-- Notification Status -->
+                            <div id="notification-status" class="mt-3">
+                                <!-- Status will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-group">
+                            <div class="form-check">
+                                {{ form.enabled(class="form-check-input") }}
+                                {{ form.enabled.label(class="form-check-label") }}
+                            </div>
+                            {% if form.enabled.errors %}
+                                <div class="text-danger mt-2">
+                                    {% for error in form.enabled.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Reminder Time</label>
+                            <div class="time-selection-container">
+                                <div class="time-dropdowns">
+                                    <div class="time-dropdown-group">
+                                        <label for="reminder-hour" class="time-label">Hour</label>
+                                        <select id="reminder-hour" name="reminder_hour" class="form-control time-select" autofocus>
+                                            {% for hour in range(1, 13) %}
+                                                {% set saved_hour = form.reminder_time_utc.data.split(':')[0].lstrip('0') if form.reminder_time_utc.data and ':' in form.reminder_time_utc.data else '' %}
+                                                <option value="{{ hour }}" {% if saved_hour == hour|string %}selected{% endif %}>{{ hour }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="time-dropdown-group">
+                                        <label for="reminder-minute" class="time-label">Minute</label>
+                                        <select id="reminder-minute" name="reminder_minute" class="form-control time-select">
+                                            {% for minute in range(0, 60) %}
+                                                {% set saved_minute = form.reminder_time_utc.data.split(':')[1].split(' ')[0].lstrip('0') if form.reminder_time_utc.data and ':' in form.reminder_time_utc.data and ' ' in form.reminder_time_utc.data else '' %}
+                                                <option value="{{ minute }}" {% if saved_minute == minute|string %}selected{% endif %}>{{ "%02d"|format(minute) }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="time-dropdown-group">
+                                        <label for="reminder-ampm" class="time-label">AM/PM</label>
+                                        <select id="reminder-ampm" name="reminder_ampm" class="form-control time-select">
+                                            {% set saved_ampm = form.reminder_time_utc.data.split(' ')[1] if form.reminder_time_utc.data and ' ' in form.reminder_time_utc.data else '' %}
+                                            <option value="AM" {% if saved_ampm == 'AM' %}selected{% endif %}>AM</option>
+                                            <option value="PM" {% if saved_ampm == 'PM' %}selected{% endif %}>PM</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            
+                            <!-- Hidden field to store the constructed time -->
+                            <input type="hidden" name="reminder_time_utc" id="reminder-time-hidden" value="{{ form.reminder_time_utc.data or '' }}" />
+                            <input type="hidden" name="timezone_offset" id="timezone_offset" value="0" />
+                            
+                            <small class="text-muted">Select your preferred reminder time in 12-hour format</small>
+                            {% if form.reminder_time_utc.errors %}
+                                <div class="text-danger mt-2">
+                                    {% for error in form.reminder_time_utc.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            {{ form.submit(class="btn btn-primary btn-block") }}
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        // Set timezone offset for backend
+        function getTimezoneOffset() {
+            const now = new Date();
+            const offsetMinutes = -now.getTimezoneOffset();
+            const timezoneInput = document.getElementById('timezone_offset');
+            if (timezoneInput) {
+                timezoneInput.value = offsetMinutes;
+            }
+        }
+
+        // Get selected time in 12-hour format
+        function getSelected12hTime() {
+            const hr = document.getElementById('reminder-hour').value;
+            const mn = document.getElementById('reminder-minute').value.padStart(2, '0');
+            const ampm = document.getElementById('reminder-ampm').value;
+            return `${hr}:${mn} ${ampm}`;
+        }
+
+        // Update hidden field with constructed time
+        function updateHiddenTimeField() {
+            const timeString = getSelected12hTime();
+            document.getElementById('reminder-time-hidden').value = timeString;
+        }
+
+
+        // Parse saved time and populate dropdowns
+        function populateTimeFromSaved(savedTime) {
+            if (!savedTime || savedTime.trim() === '') return;
+            
+            try {
+                // Parse format like "3:30 PM"
+                const parts = savedTime.trim().split(' ');
+                if (parts.length !== 2) return;
+                
+                const timePart = parts[0];
+                const ampm = parts[1];
+                
+                const [hour, minute] = timePart.split(':');
+                
+                document.getElementById('reminder-hour').value = parseInt(hour);
+                document.getElementById('reminder-minute').value = parseInt(minute);
+                document.getElementById('reminder-ampm').value = ampm;
+                
+                updateHiddenTimeField();
+            } catch (e) {
+                console.error('Error parsing saved time:', e);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log('🚀 Reminders page loaded');
+            
+            // Background is now handled by CSS
+            
+            // Set timezone offset
+            getTimezoneOffset();
+            
+            // Get saved time from hidden field and populate dropdowns
+            const savedTime = document.getElementById('reminder-time-hidden').value;
+            populateTimeFromSaved(savedTime);
+            
+            // Add event listeners to dropdowns
+            document.getElementById('reminder-hour').addEventListener('change', updateHiddenTimeField);
+            document.getElementById('reminder-minute').addEventListener('change', updateHiddenTimeField);
+            document.getElementById('reminder-ampm').addEventListener('change', updateHiddenTimeField);
+            
+            
+            // Request notification permission on page load
+            if (Notification.permission === "default") {
+                Notification.requestPermission();
+            }
+            
+            // Check for reminder time match every minute
+            setInterval(() => {
+                const reminder = getSelected12hTime();
+                const now = new Date();
+                let h = now.getHours();
+                const ampm = h >= 12 ? 'PM' : 'AM';
+                h = h % 12; 
+                if (h === 0) h = 12;
+                const curr = `${h}:${now.getMinutes().toString().padStart(2, '0')} ${ampm}`;
+                
+                if (reminder === curr) {
+                    if (Notification.permission === "granted") {
+                        new Notification("⏰ MindSpace Reminder", { 
+                            body: "It's time for your daily wellness check!",
+                            icon: '/static/images/mindspace.png'
+                        });
+                    } else if (Notification.permission !== "denied") {
+                        Notification.requestPermission().then(permission => {
+                            if (permission === "granted") {
+                                new Notification("⏰ MindSpace Reminder", { 
+                                    body: "It's time for your daily wellness check!",
+                                    icon: '/static/images/mindspace.png'
+                                });
+                            }
+                        });
+                    }
+                }
+            }, 60000);
+        });
+    </script>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Reminders background */
+    .reminders-bg {
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        padding: var(--spacing-xl) 0;
+        min-height: 100vh;
+    }
+    
+    /* Time selection container */
+    .time-selection-container {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 20px;
+        margin: 15px 0;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .time-dropdowns {
+        display: flex;
+        gap: 15px;
+        align-items: end;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .time-dropdown-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 80px;
+    }
+    
+    .time-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 8px;
+        text-align: center;
+    }
+    
+    .time-select {
+        font-family: 'Courier New', monospace;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.95);
+        border: 2px solid rgba(108, 99, 255, 0.3);
+        border-radius: 8px;
+        padding: 10px 8px;
+        min-width: 70px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .time-select:hover {
+        border-color: var(--primary-color);
+        background: rgba(255, 255, 255, 1);
+        transform: translateY(-1px);
+    }
+    
+    .time-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(108, 99, 255, 0.25);
+        background: rgba(255, 255, 255, 1);
+        outline: none;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .time-dropdowns {
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .time-dropdown-group {
+            min-width: 120px;
+        }
+        
+        .time-select {
+            min-width: 100px;
+            padding: 12px 8px;
+        }
+    }
+    
+    /* Focus management for keyboard navigation */
+    .time-select:focus {
+        z-index: 10;
+    }
+    
+    /* Visual feedback for selected time */
+    .time-select option:checked {
+        background: var(--primary-color);
+        color: white;
+    }
+</style>
+{% endblock %}

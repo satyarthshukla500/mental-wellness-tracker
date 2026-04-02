@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}Contact & Support - MindSpace{% endblock %}
+
+{% block content %}
+<div class="contact-page-content">
+    <div class="main-container">
+        <!-- Hero Section -->
+        <div class="contact-hero">
+            <h1>We're here for you!</h1>
+            <p>Your mental wellness journey is important to us. Reach out anytime for support, questions, or feedback.</p>
+        </div>
+
+        <div class="contact-grid">
+            <!-- Contact Form -->
+            <div class="contact-form-section">
+                <div class="card glass-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-envelope me-2"></i>Send us a Message</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('contact') }}" class="contact-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <div class="form-group">
+                                <label for="name" class="form-label">Name *</label>
+                                <input type="text" class="form-control" id="name" name="name" required 
+                                       placeholder="Your full name">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="email" name="email" required 
+                                       placeholder="your.email@example.com">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="subject" class="form-label">Subject *</label>
+                                <select class="form-control" id="subject" name="subject" required>
+                                    <option value="">Choose a topic...</option>
+                                    <option value="general">General Question</option>
+                                    <option value="technical">Technical Support</option>
+                                    <option value="feature">Feature Request</option>
+                                    <option value="feedback">Feedback</option>
+                                    <option value="privacy">Privacy Concern</option>
+                                    <option value="urgent">Urgent Support</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="message" class="form-label">Message *</label>
+                                <textarea class="form-control" id="message" name="message" rows="6" required 
+                                          placeholder="Please describe your question or concern in detail..."></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-paper-plane me-2"></i>Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support Information -->
+            <div class="support-info-section">
+                <div class="card glass-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-headset me-2"></i>Get in Touch</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="support-methods">
+                            <div class="support-method">
+                                <div class="support-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="support-details">
+                                    <h4>Email Support</h4>
+                                    <p>support@mindspace.app</p>
+                                    <small>We typically respond within 24 hours</small>
+                                </div>
+                            </div>
+                            
+                            <div class="support-method">
+                                <div class="support-icon">
+                                    <i class="fas fa-phone"></i>
+                                </div>
+                                <div class="support-details">
+                                    <h4>Phone Support</h4>
+                                    <p>+91 9993224491</p>
+                                    <small>Mon-Fri, 9 AM - 6 PM IST</small>
+                                </div>
+                            </div>
+                            
+                            <div class="support-method">
+                                <div class="support-icon">
+                                    <i class="fab fa-whatsapp"></i>
+                                </div>
+                                <div class="support-details">
+                                    <h4>WhatsApp</h4>
+                                    <p>+91 98266 35708</p>
+                                    <small>Quick responses for urgent matters</small>
+                                </div>
+                            </div>
+                            
+                            <div class="support-method">
+                                <div class="support-icon">
+                                    <i class="fab fa-telegram"></i>
+                                </div>
+                                <div class="support-details">
+                                    <h4>Telegram</h4>
+                                    <p>@MindSpaceSupport</p>
+                                    <small>24/7 chat support</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="faq-section">
+            <div class="card glass-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-question-circle me-2"></i>Frequently Asked Questions</h2>
+                </div>
+                <div class="card-body">
+                    <div class="faq-grid">
+                        <div class="faq-item">
+                            <h4><i class="fas fa-shield-alt me-2"></i>Is my data private and secure?</h4>
+                            <p>Absolutely! We take your privacy seriously. All your wellness data is encrypted and stored securely. We never share your personal information with third parties without your explicit consent.</p>
+                        </div>
+                        
+                        <div class="faq-item">
+                            <h4><i class="fas fa-heart me-2"></i>I need urgent mental health support</h4>
+                            <p>If you're experiencing a mental health crisis, please contact emergency services immediately. For immediate support, call your local crisis hotline or 988 (US National Suicide Prevention Lifeline).</p>
+                        </div>
+                        
+                        <div class="faq-item">
+                            <h4><i class="fas fa-mobile-alt me-2"></i>How do I use the app features?</h4>
+                            <p>Our app is designed to be intuitive! Start by adding your first mood entry on the Dashboard. Use the Reminders section to set up daily check-ins, and explore your Profile for personalized insights.</p>
+                        </div>
+                        
+                        <div class="faq-item">
+                            <h4><i class="fas fa-chart-line me-2"></i>Can I export my wellness data?</h4>
+                            <p>Yes! You can export all your wellness entries as a CSV file from your Dashboard. This allows you to keep a backup of your data or share it with healthcare providers if needed.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Safety Disclaimer -->
+        <div class="safety-disclaimer">
+            <div class="card glass-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-exclamation-triangle me-2"></i>Important Safety Information</h2>
+                </div>
+                <div class="card-body">
+                    <div class="safety-content">
+                        <p><strong>If you're experiencing a mental health emergency in India:</strong></p>
+                        <ul>
+                            <li>Call 112 (India's National Emergency Helpline)</li>
+                            <li>Contact the AASRA Helpline for suicide prevention: 91-9820466726</li>
+                            <li>Call 9152987821 for the Vandrevala Foundation Mental Health Helpline</li>
+                            <li>Contact the Snehi Emotional Support Helpline: 91-9582208181</li>
+                            <li>Call 1091 for Women's Helpline or 1098 for Child Helpline</li>
+                            <li>Visit your nearest emergency room if needed</li>
+                        </ul>
+                        
+                        <p><strong>Remember:</strong> MindSpace is a wellness tracking tool, not a replacement for professional mental health care. If you're struggling with your mental health, please reach out to a qualified mental health professional.</p>
+                        
+                        <div class="emergency-links">
+                            <div class="helpline-item" style="text-align: center; margin-bottom: 20px;">
+                                <a href="https://www.aasra.info/" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="width: 100%; max-width: 300px;">
+                                    🌐 AASRA Helpline
+                                </a>
+                                <p style="margin-top: 10px; font-size: 0.9rem; color: var(--text-secondary);">
+                                    Or call: <a href="tel:+919820466726" style="color: var(--primary-color); font-weight: 600; text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.3s;">+91-98204 66726</a>
+                                </p>
+                            </div>
+                            
+                            <div class="helpline-item" style="text-align: center; margin-bottom: 20px;">
+                                <a href="https://www.vandrevalafoundation.com/" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="width: 100%; max-width: 300px;">
+                                    🌐 Vandrevala Foundation
+                                </a>
+                                <p style="margin-top: 10px; font-size: 0.9rem; color: var(--text-secondary);">
+                                    Or call: <a href="tel:+919152987821" style="color: var(--primary-color); font-weight: 600; text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.3s;">+91-91529 87821</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form submission handling
+    const contactForm = document.querySelector('.contact-form');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            // Basic client-side validation
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value.trim();
+            
+            if (!name || !email || !subject || !message) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                e.preventDefault();
+                alert('Please enter a valid email address.');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = contactForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+            submitBtn.disabled = true;
+            
+            // Reset after 3 seconds (in case of no redirect)
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 3000);
+        });
+    }
+    
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

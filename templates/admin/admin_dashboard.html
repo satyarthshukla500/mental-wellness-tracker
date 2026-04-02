@@ -1,0 +1,202 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Dashboard - Admin Panel - MindSpace{% endblock %}
+
+{% block content %}
+<div class="dashboard-content">
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stats-card">
+            <div class="stats-icon">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-number">{{ total_messages }}</div>
+                <div class="stats-label">Total Messages</div>
+            </div>
+        </div>
+        
+        <div class="stats-card">
+            <div class="stats-icon">
+                <i class="fas fa-envelope-open"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-number">{{ unread_messages }}</div>
+                <div class="stats-label">Unread Messages</div>
+            </div>
+        </div>
+        
+        <div class="stats-card">
+            <div class="stats-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-number">{{ total_users }}</div>
+                <div class="stats-label">Total Users</div>
+            </div>
+        </div>
+        
+        <div class="stats-card">
+            <div class="stats-icon">
+                <i class="fas fa-calendar-day"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-number">{{ today_messages }}</div>
+                <div class="stats-label">Today's Messages</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts and Quick Actions -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 30px;">
+        <!-- Message Trends Chart -->
+        <div class="admin-card">
+            <h3><i class="fas fa-chart-line"></i> Message Trends (Last 7 Days)</h3>
+            <div class="chart-container">
+                <canvas id="messageTrendsChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="admin-card">
+            <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+            <div class="quick-actions">
+                <a href="{{ url_for('admin_messages') }}" class="quick-action-btn">
+                    <i class="fas fa-envelope"></i>
+                    <span>View All Messages</span>
+                </a>
+                <a href="{{ url_for('admin_messages', status='unread') }}" class="quick-action-btn">
+                    <i class="fas fa-envelope-open"></i>
+                    <span>Unread Messages</span>
+                    {% if unread_messages > 0 %}
+                    <span class="badge badge-danger">{{ unread_messages }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('admin_users') }}" class="quick-action-btn">
+                    <i class="fas fa-users"></i>
+                    <span>Manage Users</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Messages -->
+    <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3><i class="fas fa-clock"></i> Recent Messages</h3>
+            <a href="{{ url_for('admin_messages') }}" class="btn-admin btn-sm">
+                <i class="fas fa-eye"></i>
+                View All
+            </a>
+        </div>
+        
+        {% if recent_messages %}
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Subject</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for message in recent_messages %}
+                    <tr>
+                        <td>
+                            {% if message.is_read %}
+                            <span class="badge badge-success">Read</span>
+                            {% else %}
+                            <span class="badge badge-warning">Unread</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ message.name }}</td>
+                        <td>{{ message.email }}</td>
+                        <td>{{ message.subject }}</td>
+                        <td>{{ message.date_submitted.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <a href="{{ url_for('admin_message_detail', id=message.id) }}" 
+                               class="btn-admin btn-sm">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h4>No messages yet</h4>
+            <p>Contact messages will appear here once users start reaching out.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Message Trends Chart
+const ctx = document.getElementById('messageTrendsChart').getContext('2d');
+const chartData = {{ chart_data | tojson }};
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: chartData.map(item => item.date),
+        datasets: [{
+            label: 'Messages',
+            data: chartData.map(item => item.count),
+            borderColor: '#4a90e2',
+            backgroundColor: 'rgba(74, 144, 226, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#4a90e2',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.1)'
+                },
+                ticks: {
+                    color: '#333'
+                }
+            },
+            x: {
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.1)'
+                },
+                ticks: {
+                    color: '#333'
+                }
+            }
+        },
+        elements: {
+            point: {
+                hoverBackgroundColor: '#4a90e2'
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

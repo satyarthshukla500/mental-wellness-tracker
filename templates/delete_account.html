@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Account - Mental Wellness Tracker{% endblock %}
+
+{% block content %}
+<div class="main-container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="form-container">
+                    <h1 class="text-center mb-4">Delete My Account</h1>
+                    
+                    <!-- Flash messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class="flash-messages">
+                                {% for category, message in messages %}
+                                    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <!-- Warning about data deletion -->
+                    <div class="alert alert-warning">
+                        <h4 class="alert-heading">⚠️ Warning: This action cannot be undone!</h4>
+                        <p>Deleting your account will permanently remove:</p>
+                        <ul class="mb-0">
+                            <li>All your wellness entries ({{ user.wellness_entries|length }} entries)</li>
+                            <li>All your notifications</li>
+                            <li>Your reminder settings</li>
+                            <li>Your account and profile information</li>
+                        </ul>
+                        <hr>
+                        <p class="mb-0"><strong>This action is irreversible.</strong></p>
+                    </div>
+                    
+                    <!-- Confirmation form -->
+                    <div class="alert alert-danger">
+                        <h4 class="alert-heading">Confirm Account Deletion</h4>
+                        <p>To delete your account, please:</p>
+                        <ol>
+                            <li>Type "DELETE" in the confirmation field below</li>
+                            <li>Enter your current password</li>
+                            <li>Click the delete button</li>
+                        </ol>
+                        
+                        <form method="POST" onsubmit="return confirm('Are you absolutely sure you want to delete your account? This cannot be undone!');">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="form-group">
+                                {{ form.confirmation_text.label(class="form-label") }}
+                                {{ form.confirmation_text(class="form-control", placeholder="Type DELETE here") }}
+                                {% if form.confirmation_text.errors %}
+                                    <div class="text-danger mt-2">
+                                        {% for error in form.confirmation_text.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                {{ form.current_password.label(class="form-label") }}
+                                {{ form.current_password(class="form-control") }}
+                                {% if form.current_password.errors %}
+                                    <div class="text-danger mt-2">
+                                        {% for error in form.current_password.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-danger btn-block">
+                                    {{ form.submit.label.text }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary me-2">← Back to Dashboard</a>
+                        <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">Home</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

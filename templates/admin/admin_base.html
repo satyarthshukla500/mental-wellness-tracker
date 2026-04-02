@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel - MindSpace{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Admin CSS -->
+    <link href="{{ url_for('static', filename='css/admin_style.css') }}" rel="stylesheet">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="admin-page">
+    <!-- Top Navigation -->
+    <nav class="admin-top-nav">
+        <div class="admin-logo">
+            <i class="fas fa-shield-alt"></i>
+            <span>MindSpace Admin</span>
+        </div>
+        
+        <div class="admin-nav-links">
+            <a href="{{ url_for('home') }}" class="back-to-app">
+                <i class="fas fa-arrow-left"></i>
+                Back to App
+            </a>
+            <a href="{{ url_for('admin_dashboard') }}" class="{% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+            </a>
+            <a href="{{ url_for('admin_messages') }}" class="{% if request.endpoint in ['admin_messages', 'admin_message_detail'] %}active{% endif %}">
+                <i class="fas fa-envelope"></i>
+                Messages
+                {% if unread_count and unread_count > 0 %}
+                <span class="badge badge-danger">{{ unread_count }}</span>
+                {% endif %}
+            </a>
+            <a href="{{ url_for('admin_users') }}" class="{% if request.endpoint == 'admin_users' %}active{% endif %}">
+                <i class="fas fa-users"></i>
+                Users
+            </a>
+        </div>
+        
+        <div class="admin-user-menu">
+            <div class="admin-user-info">
+                <i class="fas fa-user-shield"></i>
+                <span>{{ session.admin_username }}</span>
+            </div>
+            <a href="{{ url_for('admin_change_password') }}" class="admin-logout" style="margin-right: 10px;">
+                <i class="fas fa-key"></i>
+                Change Password
+            </a>
+            <a href="{{ url_for('admin_logout') }}" class="admin-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </a>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="admin-content">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+                            <i class="fas fa-{{ 'exclamation-triangle' if category == 'danger' else 'check-circle' if category == 'success' else 'info-circle' }}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Page Content -->
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Modal Close JavaScript -->
+    <script>
+    // Base closeModal function - can be overridden by individual pages
+    window.closeModal = window.closeModal || function() {
+        console.log('Base closeModal called');
+        const modal = document.querySelector('.modal-overlay');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    };
+
+    // Close modal on overlay click
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal-overlay')) {
+            console.log('Modal overlay clicked, closing modal');
+            closeModal();
+        }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            console.log('Escape key pressed, closing modal');
+            closeModal();
+        }
+    });
+
+    // Auto-hide flash messages
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateY(-20px)';
+            setTimeout(function() {
+                alert.remove();
+            }, 300);
+        });
+    }, 5000);
+    </script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

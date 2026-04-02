@@ -1,0 +1,45 @@
+ Flask==3.0.0
+ Flask-SQLAlchemy==3.1.1
+ Flask-Migrate==4.0.5
+ Flask-Login==0.6.3
+ Flask-WTF==1.2.1
+ WTForms==3.1.1
+ email-validator==2.1.0
+ matplotlib==3.8.0
+ pandas==2.1.1
+ numpy==1.26.0
+ Werkzeug==3.0.0
+ python-dateutil==2.8.2
+
+# Flask
+# The main web framework, handles routing, web pages, sessions, and request/response logic.
+
+# Flask-SQLAlchemy
+# Adds SQLAlchemy ORM to Flask, allows you to work with the database via Python classes/objects.
+
+# Flask-Migrate
+# Manages and applies database schema changes easily (useful if you update your table structure after deploying).
+
+# Flask-Login
+# Handles user session management—who’s logged in, login/logout, restricts access.
+
+# Flask-WTF
+# Advanced forms for Flask, provides validation, CSRF protection, and easy form handling.
+
+# WTForms
+# Powers form logic—fields, validation rules, matches with Flask-WTF for front-end forms.
+
+# email-validator
+# Checks emails during registration so only valid addresses are accepted.
+
+# matplotlib and pandas
+# For analytics/charting—convert raw data into graphs or statistical summaries in dashboard.
+
+# numpy
+# Supports calculations (e.g., averages, mathematical operations used in analytics).
+
+# Werkzeug
+# Security functions—especially for hashing passwords and comparing hashes during login.
+
+# python-dateutil
+# Helps manipulate dates/times for reminders, entry timestamps, analytics.

@@ -1,0 +1,879 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Mental Wellness Tracker{% endblock %}
+
+{% block extra_head %}
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .notification-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .notification-message {
+            flex: 1;
+            margin-right: 15px;
+            font-weight: 500;
+        }
+        
+        .notification-time {
+            margin-right: 15px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+        
+        .mark-read-btn {
+            margin-left: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .mark-read-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .notifications-section {
+            margin-bottom: 30px;
+        }
+        
+        .notifications-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .notifications-section h2 {
+            margin-bottom: 0;
+            color: #fff;
+        }
+        
+        .mark-all-read-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+        }
+        
+        .mark-all-read-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(40, 167, 69, 0.4);
+            background: linear-gradient(135deg, #20c997 0%, #28a745 100%);
+        }
+        
+        .mark-all-read-btn:active {
+            transform: translateY(0);
+        }
+        
+        .intensity-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 8px;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="main-container">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="text-center mb-4">Your Wellness Dashboard</h1>
+                
+                <!-- Flash messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for category, message in messages %}
+                                <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                <p class="text-center text-muted mb-4">Welcome back, {{ user.username }}!</p>
+
+                <!-- Enhanced filter controls with date range -->
+                <div class="filter-section">
+                    <h3 class="mb-3">Filter Your Data</h3>
+                    <form method="GET" action="{{ url_for('dashboard') }}" class="filter-form">
+                        <div class="form-group">
+                            <label for="month" class="form-label">Month:</label>
+                            <input type="month" id="month" name="month" value="{{ selected_month }}" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="date" class="form-label">Specific Date:</label>
+                            <input type="date" id="date" name="date" value="{{ selected_date }}" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="start_date" class="form-label">Start Date:</label>
+                            <input type="date" id="start_date" name="start_date" value="{{ start_date }}" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="end_date" class="form-label">End Date:</label>
+                            <input type="date" id="end_date" name="end_date" value="{{ end_date }}" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Apply Filters</button>
+                        </div>
+                    </form>
+                    <p class="filter-help">
+                        <strong>Priority:</strong> Custom date range → Specific date → Month view
+                    </p>
+                </div>
+                
+                
+                <!-- Notifications -->
+                {% if notifications %}
+                    <div class="notifications-section">
+                        <div class="notifications-header">
+                            <h2>Notifications</h2>
+                            <form method="POST" action="{{ url_for('mark_all_notifications_read') }}" class="d-inline mark-all-form">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button type="submit" class="btn btn-success btn-sm mark-all-read-btn">
+                                    <i class="fas fa-check-double me-1"></i>Mark All as Read
+                                </button>
+                            </form>
+                        </div>
+                        {% for n in notifications %}
+                            <div class="notification-item">
+                                <div class="notification-message">
+                                    {{ n.message }}
+                                </div>
+                                <div class="notification-time">
+                                    {{ n.created_at.strftime('%b %d, %Y %H:%M') }}
+                                </div>
+                                <form method="POST" action="{{ url_for('read_notification', notification_id=n.id) }}" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button type="submit" class="btn btn-sm btn-outline-primary mark-read-btn">Mark read</button>
+                                </form>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Analytics Section -->
+                <div class="analytics-section">
+                    <h2>Your Wellness Analytics</h2>
+                    
+                    <!-- Quick Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Total Entries</h3>
+                            <p>{{ total_entries }}</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Most Common Mood</h3>
+                            <p class="mood-display">{{ most_common_mood }}</p>
+                        </div>
+                        {% if overall_average > 0 %}
+                        <div class="stat-card">
+                            <h3>Average Mood Score</h3>
+                            <p>{{ "%.1f"|format(overall_average) }}/5</p>
+                            <small class="text-muted">Scale: 1 (Low) - 5 (High)</small>
+                        </div>
+                        {% endif %}
+                        {% if best_day %}
+                        <div class="stat-card best-day">
+                            <h3>Best Day</h3>
+                            <p class="date-display">{{ best_day[0].strftime('%b %d, %Y') }}</p>
+                            <p>{{ "%.1f"|format(best_day[1]) }}/5</p>
+                        </div>
+                        {% endif %}
+                        {% if worst_day %}
+                        <div class="stat-card challenging-day">
+                            <h3>Challenging Day</h3>
+                            <p class="date-display">{{ worst_day[0].strftime('%b %d, %Y') }}</p>
+                            <p>{{ "%.1f"|format(worst_day[1]) }}/5</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Charts -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <h3>Mood Distribution</h3>
+                                <canvas id="moodChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <h3>Mood Timeline ({{ selected_month }})</h3>
+                                <canvas id="timelineChart"></canvas>
+                                <div id="timelineLegend" style="margin-top: 10px; text-align: center;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Personalized Wellness Tips Section -->
+                <div class="analytics-section">
+                    <h2>💡 Personalized Wellness Tips</h2>
+                    <p class="text-muted mb-4">
+                        Based on your recent mood patterns over the last {{ mood_analysis.days_analyzed if mood_analysis else 14 }} days
+                    </p>
+                    
+                    {% if wellness_tips %}
+                        <div class="tips-container">
+                            {% for tip in wellness_tips %}
+                                <div class="tip-card tip-{{ tip.priority }}">
+                                    <div class="tip-header">
+                                        <h3>{{ tip.title }}</h3>
+                                        <span class="tip-priority">{{ tip.priority|title }} Priority</span>
+                                    </div>
+                                    <p class="tip-content">{{ tip.tip }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        {% if mood_analysis %}
+                            <div class="mood-insights">
+                                <h4>Your Mood Insights:</h4>
+                                <ul>
+                                    <li><strong>Average mood score:</strong> {{ "%.1f"|format(mood_analysis.avg_score) }}/5 over {{ mood_analysis.total_entries }} entries</li>
+                                    <li><strong>Most common mood:</strong> {{ mood_analysis.most_common_mood }}</li>
+                                    <li><strong>Recent trend:</strong> {{ mood_analysis.trend_direction|title }}</li>
+                                </ul>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="tip-card tip-high">
+                            <div class="tip-header">
+                                <h3>Start Your Wellness Journey</h3>
+                                <span class="tip-priority">High Priority</span>
+                            </div>
+                            <p class="tip-content">Begin by adding your first mood entry to receive personalized wellness tips!</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Recent wellness entries -->
+                <div class="entries-list">
+                    <h2>Your Recent Wellness Entries</h2>
+                    
+                    {% if entries %}
+                        {% for entry in entries %}
+                            <div class="entry-card">
+                                <div class="entry-mood">{{ entry.mood }} <span class="intensity-badge">({{ entry.intensity }}/5)</span></div>
+                                <div class="entry-date">
+                                    <strong>Date:</strong> {{ entry.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                </div>
+                                {% if entry.notes %}
+                                    <div class="entry-notes">
+                                        <strong>Notes:</strong> {{ entry.notes }}
+                                    </div>
+                                {% endif %}
+                                <div class="entry-actions">
+                                    <a href="{{ url_for('edit_entry', entry_id=entry.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                    <form method="POST" action="{{ url_for('delete_entry', entry_id=entry.id) }}" class="d-inline">
+                                        {{ delete_form.hidden_tag() }}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this entry?');">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <p class="mb-3">No wellness entries yet.</p>
+                                <a href="{{ url_for('add_entry') }}" class="btn btn-primary">Add your first entry</a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Add Entry Button -->
+                <div class="text-center mt-5 mb-4">
+                    <a href="{{ url_for('add_entry') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus me-2"></i>Add New Wellness Entry
+                    </a>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        // ================= COMPLETE BROWSER NOTIFICATION SYSTEM =================
+        console.log('🔔 Dashboard: Notification system initializing...');
+
+        // Global notification permission state
+        let notificationPermission = 'default';
+        let reminderTimer = null;
+
+        // Check if notifications are supported
+        function isNotificationSupported() {
+            if (!('Notification' in window)) {
+                console.warn('❌ Notifications not supported in this browser');
+                return false;
+            }
+            return true;
+        }
+
+        // Request notification permission with user feedback
+        async function requestNotificationPermission() {
+            console.log('🔔 Requesting notification permission...');
+            
+            if (!isNotificationSupported()) {
+                return 'unsupported';
+            }
+
+            try {
+                const permission = await Notification.requestPermission();
+                console.log('🔔 Permission result:', permission);
+                notificationPermission = permission;
+                return permission;
+            } catch (error) {
+                console.error('❌ Error requesting permission:', error);
+                return 'error';
+            }
+        }
+
+        // Normalize time to 24h HH:MM (supports inputs like "02:34 PM")
+        function normalizeTime(str) {
+            if (!str) return '';
+            const s = String(str).trim().toUpperCase();
+            const m = s.match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM))?$/);
+            if (!m) return s;
+            let h = parseInt(m[1], 10);
+            const mm = m[2];
+            const ap = m[3];
+            if (ap) {
+                if (ap === 'PM' && h < 12) h += 12;
+                if (ap === 'AM' && h === 12) h = 0;
+            }
+            return `${String(h).padStart(2, '0')}:${mm}`;
+        }
+
+        // Load reminder settings from localStorage
+        function loadReminderSettings() {
+            const enabled = localStorage.getItem('mw_reminder_enabled') === '1';
+            const raw = localStorage.getItem('mw_reminder_time') || '';
+            const time = normalizeTime(raw);
+            console.log('📖 Dashboard: Loaded reminder settings:', { enabled, time, raw });
+            return { enabled, time };
+        }
+
+        // Check if it's time to show notification
+        function shouldShowNotification(time) {
+            const now = new Date();
+            const hhmm = normalizeTime(time);
+            const [hours, minutes] = hhmm.split(':').map(Number);
+            const targetTime = new Date();
+            targetTime.setHours(hours, minutes, 0, 0);
+
+            // Fire only when the system time reaches or passes the exact target minute
+            const reached = now.getTime() >= targetTime.getTime();
+
+            // Check if we already showed notification today
+            const today = now.toDateString();
+            const lastNotification = localStorage.getItem('mw_reminder_last_notification');
+            const alreadyShownToday = lastNotification === today;
+
+            console.log('⏰ Dashboard: Time check:', {
+                now: now.toTimeString(),
+                target: targetTime.toTimeString(),
+                reached,
+                alreadyShownToday,
+                shouldShow: reached && !alreadyShownToday,
+                normalized: hhmm
+            });
+
+            return reached && !alreadyShownToday;
+        }
+
+        // Show browser notification
+        function showNotification(message = "Time to log your mood!") {
+            console.log('🔔 Dashboard: Showing notification:', message);
+            
+            if (Notification.permission !== 'granted') {
+                console.warn('❌ Cannot show notification: permission not granted');
+                return;
+            }
+
+            try {
+                const notification = new Notification('Wellness Reminder', {
+                    body: message,
+                    icon: '/static/favicon.ico',
+                    badge: '/static/favicon.ico',
+                    tag: 'wellness-reminder',
+                    requireInteraction: false
+                });
+
+                // Mark as shown today
+                localStorage.setItem('mw_reminder_last_notification', new Date().toDateString());
+                
+                // Auto-close after 10 seconds
+                setTimeout(() => {
+                    notification.close();
+                }, 10000);
+
+                console.log('✅ Dashboard: Notification displayed successfully');
+            } catch (error) {
+                console.error('❌ Dashboard: Error showing notification:', error);
+            }
+        }
+
+        // Start reminder timer (check every minute)
+        function startReminderTimer() {
+            console.log('⏰ Dashboard: Starting reminder timer...');
+            
+            // Clear existing timer
+            if (reminderTimer) {
+                clearInterval(reminderTimer);
+            }
+
+            function tick() {
+                const settings = loadReminderSettings();
+                
+                if (settings.enabled && settings.time && Notification.permission === 'granted') {
+                    console.log('🔍 Dashboard: Checking if reminder should fire...');
+                    
+                    if (shouldShowNotification(settings.time)) {
+                        showNotification("Time to log your mood! How are you feeling today?");
+                    }
+                }
+            }
+
+            // Run once immediately so you don't have to wait up to 1 minute
+            tick();
+            // Then check every minute
+            reminderTimer = setInterval(tick, 60000);
+
+            console.log('✅ Dashboard: Reminder timer started');
+        }
+
+        // Test function to force notification (for debugging)
+        function testNotification() {
+            console.log('🧪 Dashboard: Testing notification...');
+            localStorage.removeItem('mw_reminder_last_notification');
+            showNotification("TEST: This is a test notification!");
+        }
+
+        // Make test function available globally for console debugging
+        window.testNotification = testNotification;
+
+        // Initialize notification system on dashboard
+        function initializeNotificationSystem() {
+            console.log('🚀 Dashboard: Initializing notification system...');
+            
+            // Check current permission status
+            if (isNotificationSupported()) {
+                notificationPermission = Notification.permission;
+                console.log('🔔 Dashboard: Current permission status:', notificationPermission);
+                
+                // Auto-request permission if not already granted/denied
+                if (notificationPermission === 'default') {
+                    console.log('🔔 Dashboard: Auto-requesting permission...');
+                    requestNotificationPermission().then(permission => {
+                        if (permission === 'granted') {
+                            // Start timer if we have valid settings
+                            const settings = loadReminderSettings();
+                            if (settings.enabled && settings.time) {
+                                startReminderTimer();
+                            }
+                        }
+                    });
+                } else if (notificationPermission === 'granted') {
+                    // Start timer if we have valid settings
+                    const settings = loadReminderSettings();
+                    if (settings.enabled && settings.time) {
+                        startReminderTimer();
+                    }
+                }
+            }
+        }
+
+        // ================= In-app Browser Reminder Notifications =================
+        // Read reminder settings from localStorage and schedule a browser Notification
+        (function scheduleDailyReminder() {
+            if (!('Notification' in window)) return; // not supported
+            const enabled = localStorage.getItem('mw_reminder_enabled') === '1';
+            const hhmm = localStorage.getItem('mw_reminder_time') || '';
+            if (!enabled || !hhmm) return;
+
+            // De-duplicate: fire once per day
+            const todayKey = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+            const lastFired = localStorage.getItem('mw_reminder_last_fired');
+            
+            function timeUntilNext(hhmmStr) {
+                const [h, m] = hhmmStr.split(':').map(Number);
+                const now = new Date();
+                const target = new Date();
+                target.setHours(h, m, 0, 0);
+                if (target <= now) {
+                    // schedule for tomorrow
+                    target.setDate(target.getDate() + 1);
+                }
+                return target.getTime() - now.getTime();
+            }
+
+            function showReminder() {
+                // Only show if permission granted
+                if (Notification.permission === 'granted') {
+                    const n = new Notification('Wellness reminder', {
+                        body: "It's time to record your mood for today!",
+                        icon: '/static/favicon.ico'
+                    });
+                    // Mark fired date
+                    localStorage.setItem('mw_reminder_last_fired', todayKey);
+                }
+            }
+
+            // If permission not granted yet, do nothing here (user can enable from Reminders page)
+            if (Notification.permission !== 'granted') return;
+
+            // If already fired today, schedule next occurrence tomorrow
+            const delay = timeUntilNext(hhmm);
+            setTimeout(function () {
+                // Before showing, check day duplication again
+                const nowKey = new Date().toISOString().slice(0,10);
+                const last = localStorage.getItem('mw_reminder_last_fired');
+                if (last !== nowKey) {
+                    showReminder();
+                }
+                // Schedule subsequent 24h interval reminders
+                setInterval(showReminder, 24 * 60 * 60 * 1000);
+            }, Math.max(0, delay));
+        })();
+
+        // Fetch mood data and create charts
+        async function loadCharts() {
+            try {
+                const params = new URLSearchParams();
+                
+                // Add all filter parameters
+                if ('{{ start_date }}') params.append('start_date', '{{ start_date }}');
+                if ('{{ end_date }}') params.append('end_date', '{{ end_date }}');
+                if ('{{ selected_date }}') params.append('date', '{{ selected_date }}');
+                if ('{{ selected_month }}') params.append('month', '{{ selected_month }}');
+                
+                const query = '/api/mood_data?' + params.toString();
+                console.log('🔍 Dashboard: Fetching mood data from:', query);
+                const response = await fetch(query);
+                const data = await response.json();
+                console.log('📊 Dashboard: API Data received:', data);
+                
+                // Mood Distribution Chart (Pie Chart)
+                const moodCtx = document.getElementById('moodChart').getContext('2d');
+                new Chart(moodCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.mood_distribution.labels,
+                        datasets: [{
+                            data: data.mood_distribution.data,
+                            backgroundColor: [
+                                '#FF6384',  // Happy - Bright pink
+                                '#36A2EB',  // Excited - Bright blue
+                                '#FFCE56',  // Grateful - Golden yellow
+                                '#4BC0C0',  // Proud - Teal
+                                '#9966FF',  // Hopeful - Purple
+                                '#FF9F40',  // Content - Orange
+                                '#41d2c4',  // Calm - Fresh mint teal (NOT gray!)
+                                '#ff6b9d'   // Frustrated - Pink-red
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                
+                // Mood Score Timeline Chart (Single Continuous Line with Mood Colors)
+                const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+                
+                // Use the continuous mood score data from the API
+                const timelineData = data.timeline;
+                const dates = timelineData.dates;
+                const moodScores = timelineData.mood_scores;
+                const moodTypes = timelineData.mood_types;
+                
+                // Debug: Log the timeline data
+                console.log('🔍 Dashboard: Timeline data:', timelineData);
+                console.log('🔍 Dashboard: Dates:', dates);
+                console.log('🔍 Dashboard: Mood scores:', moodScores);
+                console.log('🔍 Dashboard: Mood types:', moodTypes);
+                
+                // Define positive, emotionally appropriate mood colors (matching donut chart exactly)
+                const moodColors = {
+                    'Happy': '#FF6384',        // Bright pink - joyful
+                    'Excited': '#36A2EB',      // Bright blue - energetic
+                    'Grateful': '#FFCE56',     // Golden yellow - warm
+                    'Proud': '#4BC0C0',        // Teal - confident
+                    'Hopeful': '#9966FF',      // Purple - optimistic
+                    'Content': '#FF9F40',      // Orange - satisfied
+                    'Calm': '#41d2c4',         // Fresh mint teal - peaceful (NOT gray!)
+                    'Tired': '#FF6384',        // Pink - gentle
+                    'Confused': '#36A2EB',     // Blue - thoughtful
+                    'Sad': '#487eb0',          // Soft blue - gentle sadness
+                    'Anxious': '#4a90e2',      // Deep blue - contemplative
+                    'Frustrated': '#ff6b9d',   // Pink-red - passionate
+                    'Lonely': '#ffd166',       // Light yellow - hopeful
+                    'Overwhelmed': '#b97ef0',  // Purple - complex but not dark
+                    'Angry': '#ff3e36',        // Strong red - intense
+                    'Stressed': '#b97ef0'      // Purple - complex
+                };
+                
+                // Create data points with colors
+                const dataPoints = dates.map((date, index) => ({
+                    x: date,
+                    y: moodScores[index],
+                    mood: moodTypes[index],
+                    color: moodColors[moodTypes[index]] || '#41d2c4'  // Fallback to calm teal
+                }));
+                
+                console.log('🔍 Dashboard: Data points with colors:', dataPoints);
+                
+                // Create the single mood score line chart with segment coloring
+                const chartLabels = dates;
+                const chartDataset = {
+                    label: 'Mood Score',
+                    data: dataPoints,
+                    borderColor: function(context) {
+                        // Color each segment based on the current point's mood
+                        const pointIndex = context.p0DataIndex;
+                        return dataPoints[pointIndex] ? dataPoints[pointIndex].color : '#41d2c4';
+                    },
+                    backgroundColor: 'transparent',
+                    tension: 0.3,  // Smooth curves
+                    fill: false,  // No area under the line
+                        pointRadius: 7,
+                    pointHoverRadius: 10,
+                        pointBorderWidth: 2,
+                    pointBackgroundColor: function(context) {
+                        const pointIndex = context.dataIndex;
+                        return dataPoints[pointIndex] ? dataPoints[pointIndex].color : '#41d2c4';
+                    },
+                    pointBorderColor: function(context) {
+                        const pointIndex = context.dataIndex;
+                        return dataPoints[pointIndex] ? dataPoints[pointIndex].color : '#41d2c4';
+                    },
+                        borderWidth: 3,
+                    spanGaps: false,  // No gaps - continuous line
+                    showLine: true,
+                    segment: {
+                        borderColor: function(ctx) {
+                            // Use the current point's color for the segment
+                            const pointIndex = ctx.p0DataIndex;
+                            return dataPoints[pointIndex] ? dataPoints[pointIndex].color : '#41d2c4';
+                        }
+                    }
+                };
+                
+                console.log('🔍 Dashboard: Creating mood-colored chart with labels:', chartLabels);
+                console.log('🔍 Dashboard: Creating mood-colored chart with data points:', dataPoints);
+                
+                try {
+                    new Chart(timelineCtx, {
+                        type: 'line',
+                        data: {
+                            labels: chartLabels,
+                            datasets: [chartDataset]
+                        },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20,
+                                    font: {
+                                        size: 14
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.parsed.y;
+                                        const date = context.label;
+                                        const pointIndex = context.dataIndex;
+                                        const mood = dataPoints[pointIndex] ? dataPoints[pointIndex].mood : 'Unknown';
+                                        return `Mood: ${mood} (${value}/5) - ${date}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Date'
+                                },
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45,
+                                    autoSkip: true,
+                                    maxTicksLimit: 15
+                                },
+                                grid: {
+                                    display: true,
+                                    color: 'rgba(0,0,0,0.1)'
+                                }
+                            },
+                            y: {
+                                beginAtZero: false,
+                                max: 5,
+                                min: 1,
+                                title: {
+                                    display: true,
+                                    text: 'Mood Intensity (1-5)'
+                                },
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        return value; // Show all integer values
+                                    }
+                                },
+                                grid: {
+                                    display: true,
+                                    color: 'rgba(0,0,0,0.1)'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                console.log('🔍 Dashboard: Chart created successfully');
+                
+                // Create custom legend for mood colors
+                const legendContainer = document.getElementById('timelineLegend');
+                if (legendContainer) {
+                    legendContainer.innerHTML = '';
+                    
+                    // Get unique moods from the data
+                    const uniqueMoods = [...new Set(moodTypes)];
+                    
+                    uniqueMoods.forEach(mood => {
+                        const legendItem = document.createElement('div');
+                        legendItem.style.display = 'inline-block';
+                        legendItem.style.margin = '5px 10px';
+                        legendItem.style.fontSize = '12px';
+                        
+                        const colorBox = document.createElement('span');
+                        colorBox.style.display = 'inline-block';
+                        colorBox.style.width = '12px';
+                        colorBox.style.height = '12px';
+                        colorBox.style.backgroundColor = moodColors[mood] || '#41d2c4';
+                        colorBox.style.marginRight = '5px';
+                        colorBox.style.borderRadius = '2px';
+                        
+                        const moodLabel = document.createElement('span');
+                        moodLabel.textContent = mood;
+                        
+                        legendItem.appendChild(colorBox);
+                        legendItem.appendChild(moodLabel);
+                        legendContainer.appendChild(legendItem);
+                    });
+                }
+                
+                } catch (chartError) {
+                    console.error('🔍 Dashboard: Error creating timeline chart:', chartError);
+                    timelineCtx.font = '16px Arial';
+                    timelineCtx.fillStyle = '#ff0000';
+                    timelineCtx.textAlign = 'center';
+                    timelineCtx.fillText('Error loading chart data', timelineCtx.canvas.width / 2, timelineCtx.canvas.height / 2);
+                }
+                
+            } catch (error) {
+                console.error('Error fetching mood data:', error);
+            }
+        }
+        
+        // Handle mark as read button clicks
+        function initializeMarkAsReadButtons() {
+            const markReadButtons = document.querySelectorAll('.mark-read-btn');
+            
+            markReadButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // Hide the button immediately for better UX
+                    this.style.display = 'none';
+                    
+                    // Add a small delay to show the action was processed
+                    setTimeout(() => {
+                        // The form will submit and redirect, so this is just for visual feedback
+                    }, 100);
+                });
+            });
+        }
+
+        // Handle mark all as read button click
+        function initializeMarkAllAsReadButton() {
+            const markAllForm = document.querySelector('.mark-all-form');
+            
+            if (markAllForm) {
+                markAllForm.addEventListener('submit', function(e) {
+                    const submitBtn = this.querySelector('.mark-all-read-btn');
+                    const originalText = submitBtn.innerHTML;
+                    
+                    // Show loading state immediately
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing...';
+                    submitBtn.disabled = true;
+                    
+                    // Add timeout to reset button if form doesn't submit
+                    const timeoutId = setTimeout(() => {
+                        if (submitBtn.disabled) {
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.disabled = false;
+                            console.log('Form submission timeout - resetting button');
+                        }
+                    }, 5000); // 5 second timeout
+                    
+                    // Clear timeout if form submits successfully
+                    this.addEventListener('submit', function() {
+                        clearTimeout(timeoutId);
+                    }, { once: true });
+                });
+            }
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Dashboard: DOM loaded');
+            
+            // Initialize notification system
+            initializeNotificationSystem();
+            
+            // Initialize mark as read buttons
+            initializeMarkAsReadButtons();
+            
+            // Initialize mark all as read button
+            initializeMarkAllAsReadButton();
+            
+            // Load charts
+            loadCharts();
+        });
+    </script>
+{% endblock %}

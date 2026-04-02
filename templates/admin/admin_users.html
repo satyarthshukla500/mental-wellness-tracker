@@ -1,0 +1,269 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Users - Admin Panel - MindSpace{% endblock %}
+
+{% block content %}
+<div class="users-content">
+    <!-- Search and Stats -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 30px;">
+        <div class="admin-card">
+            <h3><i class="fas fa-search"></i> Search Users</h3>
+            <form method="GET" style="display: flex; gap: 15px; align-items: end;">
+                <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #666;">Search</label>
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="Search by username or email..."
+                           value="{{ request.args.get('search', '') }}">
+                </div>
+                <div>
+                    <button type="submit" class="btn-admin">
+                        <i class="fas fa-search"></i>
+                        Search
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="admin-card text-center">
+            <h3><i class="fas fa-users"></i> Total Users</h3>
+            <div class="stats-number" style="font-size: 48px; margin: 20px 0;">{{ users.total }}</div>
+        </div>
+    </div>
+    
+    <!-- Users Table -->
+    <div class="admin-card">
+        <h3><i class="fas fa-users"></i> Registered Users</h3>
+        
+        {% if users.items %}
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Registration Date</th>
+                        <th>Wellness Entries</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users.items %}
+                    <tr>
+                        <td>
+                            <span style="font-family: 'Courier New', monospace; font-size: 14px; color: #666;">#{{ user.id }}</span>
+                        </td>
+                        <td>
+                            <div>
+                                <strong>{{ user.username }}</strong>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="mailto:{{ user.email }}" style="color: #4a90e2; text-decoration: none;">
+                                {{ user.email }}
+                            </a>
+                        </td>
+                        <td>
+                            <div style="font-size: 14px; line-height: 1.4;">
+                                {{ user.created_at.strftime('%Y-%m-%d') }}<br>
+                                <small style="color: #666;">{{ user.created_at.strftime('%H:%M') }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-info">
+                                {{ user.wellness_entries | length }} entries
+                            </span>
+                        </td>
+                        <td>
+                            {% if user_statuses[user.id].badge_type == 'success' %}
+                            <span class="badge badge-success">
+                                <i class="fas fa-check-circle"></i> {{ user_statuses[user.id].badge_text }}
+                            </span>
+                            {% elif user_statuses[user.id].badge_type == 'warning' %}
+                            <span class="badge badge-warning">
+                                <i class="fas fa-clock"></i> {{ user_statuses[user.id].badge_text }}
+                            </span>
+                            {% else %}
+                            <span class="badge badge-danger">
+                                <i class="fas fa-exclamation-circle"></i> {{ user_statuses[user.id].badge_text }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 5px;">
+                                <button type="button" class="btn-admin btn-sm" 
+                                        onclick="openUserModal({{ user.id }})" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                {% if user_statuses[user.id].status == 'inactive' %}
+                                <a href="https://mail.google.com/mail/?view=cm&fs=1&to={{ user.email }}&su=MindSpace:%20Your%20next%20wellness%20update%20is%20just%20a%20click%20away&body=Hi%20{{ user.username }},%0D%0A%0D%0AWe%20noticed%20you%20haven't%20checked%20in%20with%20MindSpace%20for%20a%20little%20while.%0D%0A%0D%0ATaking%20a%20moment%20to%20track%20your%20feelings%20and%20reflect%20on%20your%20day%20can%20make%20a%20real%20difference%E2%80%94for%20you,%20and%20for%20your%20long-term%20wellbeing.%20Remember,%20your%20journey%20matters,%20and%20we're%20here%20to%20support%20you.%0D%0A%0D%0ALog%20in%20now%20and%20add%20a%20new%20wellness%20entry,%20even%20if%20it's%20just%20a%20quick%20note.%20Every%20reflection%20is%20a%20step%20forward.%0D%0A%0D%0AIf%20you%20need%20any%20help,%20advice,%20or%20want%20to%20talk,%20our%20support%20team%20is%20just%20a%20click%20away.%0D%0A%0D%0AStay%20well,%0D%0AThe%20MindSpace%20Team" 
+                                       target="_blank" 
+                                       class="btn-admin btn-sm btn-outline-primary" 
+                                       title="Send Wellness Reminder">
+                                    <i class="fas fa-envelope"></i>
+                                    Remind
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if users.pages > 1 %}
+        <div class="pagination">
+            {% if users.has_prev %}
+            <a class="page-link" href="{{ url_for('admin_users', page=users.prev_num, search=request.args.get('search')) }}">
+                <i class="fas fa-chevron-left"></i> Previous
+            </a>
+            {% endif %}
+            
+            {% for page_num in users.iter_pages() %}
+                {% if page_num %}
+                    {% if page_num != users.page %}
+                    <a class="page-link" href="{{ url_for('admin_users', page=page_num, search=request.args.get('search')) }}">
+                        {{ page_num }}
+                    </a>
+                    {% else %}
+                    <span class="page-link" style="background: #4a90e2; color: white; border-color: #4a90e2;">{{ page_num }}</span>
+                    {% endif %}
+                {% else %}
+                <span class="page-link" style="background: #f8f8f8; color: #ccc; border-color: #eee;">...</span>
+                {% endif %}
+            {% endfor %}
+            
+            {% if users.has_next %}
+            <a class="page-link" href="{{ url_for('admin_users', page=users.next_num, search=request.args.get('search')) }}">
+                Next <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <h4>No users found</h4>
+            <p>{% if request.args.get('search') %}
+                No users match your search criteria. Try adjusting your search terms.
+            {% else %}
+                No users have registered yet.
+            {% endif %}</p>
+            {% if request.args.get('search') %}
+            <a href="{{ url_for('admin_users') }}" class="btn-admin">
+                <i class="fas fa-refresh"></i>
+                Clear Search
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- User Details Modal -->
+<div id="userModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <h3 id="modalTitle"><i class="fas fa-user"></i> User Details</h3>
+        <div id="modalBody">
+            <!-- User details will be loaded here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Simple modal functions
+window.closeModal = function() {
+    console.log('Closing modal');
+    const modal = document.getElementById('userModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+};
+
+window.openUserModal = function(userId) {
+    console.log('Opening modal for user ID:', userId);
+    
+    // Get user data from the table row
+    const row = document.querySelector(`button[onclick="openUserModal(${userId})"]`).closest('tr');
+    if (!row) {
+        console.error('User row not found');
+        return;
+    }
+    
+    const cells = row.querySelectorAll('td');
+    const username = cells[1].textContent.trim();
+    const email = cells[2].textContent.trim();
+    const regDate = cells[3].textContent.trim();
+    const entries = cells[4].textContent.trim();
+    
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const modal = document.getElementById('userModal');
+    
+    if (!modalTitle || !modalBody || !modal) {
+        console.error('Modal elements not found');
+        return;
+    }
+    
+    modalTitle.innerHTML = `<i class="fas fa-user"></i> User Details - ${username}`;
+    
+    const modalContent = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+            <div>
+                <div class="info-item">
+                    <label><i class="fas fa-id-badge"></i> User ID:</label>
+                    <span>#${userId}</span>
+                </div>
+                <div class="info-item">
+                    <label><i class="fas fa-user"></i> Username:</label>
+                    <span>${username}</span>
+                </div>
+                <div class="info-item">
+                    <label><i class="fas fa-envelope"></i> Email:</label>
+                    <span style="color: #4a90e2;">${email}</span>
+                </div>
+            </div>
+            <div>
+                <div class="info-item">
+                    <label><i class="fas fa-calendar"></i> Registration Date:</label>
+                    <span>${regDate}</span>
+                </div>
+                <div class="info-item">
+                    <label><i class="fas fa-heart"></i> Wellness Entries:</label>
+                    <span class="badge badge-info">${entries}</span>
+                </div>
+                <div class="info-item">
+                    <label><i class="fas fa-bell"></i> Reminder Settings:</label>
+                    <span class="badge badge-secondary">No settings</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    modalBody.innerHTML = modalContent;
+    modal.style.display = 'flex';
+    console.log('Modal opened successfully');
+};
+
+// Auto-submit search form on Enter key
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                this.form.submit();
+            }
+        });
+    }
+    
+    console.log('Admin users page loaded');
+});
+</script>
+{% endblock %}

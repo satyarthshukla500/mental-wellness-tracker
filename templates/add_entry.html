@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Add Wellness Entry - Mental Wellness Tracker{% endblock %}
+
+{% block content %}
+<div class="full-page-bg">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                    <div class="form-container">
+                        <h1 class="text-center mb-4">Add Wellness Entry</h1>
+                        
+                        <!-- Flash messages -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                <div class="flash-messages">
+                                    {% for category, message in messages %}
+                                        <div class="flash-message flash-{{ category }}">
+                                            {{ message }}
+                                            <button type="button" class="flash-close" aria-label="Close">&times;</button>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                        
+                        <!-- Wellness entry form -->
+                        <form method="POST">
+                            {{ form.hidden_tag() }}
+                            
+                            <!-- Mood Selection Controls -->
+                            <div class="form-group">
+                                <label class="form-label">How are you feeling?</label>
+                                <div class="mood-controls">
+                                    <div class="form-group">
+                                        {{ form.mood(class="form-control") }}
+                                        <div class="mood-help">Choose from common moods</div>
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.custom_mood(class="form-control") }}
+                                        <div class="mood-help">Or describe your own mood</div>
+                                    </div>
+                                </div>
+                                {% if form.mood.errors or form.custom_mood.errors %}
+                                    <div class="text-danger mt-2">
+                                        {% for error in form.mood.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                        {% for error in form.custom_mood.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Intensity -->
+                            <div class="form-group">
+                                {{ form.intensity.label(class="form-label") }}
+                                {{ form.intensity(class="form-control") }}
+                                <div class="form-text">Rate the intensity of this mood from 1 (very mild) to 5 (very intense)</div>
+                                {% if form.intensity.errors %}
+                                    <div class="text-danger mt-2">
+                                        {% for error in form.intensity.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        
+                            <!-- Notes -->
+                            <div class="form-group">
+                                {{ form.notes.label(class="form-label") }}
+                                {{ form.notes(class="form-control") }}
+                                {% if form.notes.errors %}
+                                    <div class="text-danger mt-2">
+                                        {% for error in form.notes.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <div class="form-group">
+                                {{ form.submit(class="btn btn-primary btn-block") }}
+                            </div>
+                        </form>
+                        
+                        <div class="text-center mt-4">
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary me-2">Back to Dashboard</a>
+                            <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">Home</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

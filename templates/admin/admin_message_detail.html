@@ -1,0 +1,142 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Message Details - Admin Panel - MindSpace{% endblock %}
+
+{% block content %}
+<div class="message-detail-content">
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+        <!-- Message Details Card -->
+        <div class="admin-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3><i class="fas fa-envelope"></i> Message Details</h3>
+                <div>
+                    {% if message.is_read %}
+                    <span class="badge badge-success">
+                        <i class="fas fa-check"></i> Read
+                    </span>
+                    {% else %}
+                    <span class="badge badge-warning">
+                        <i class="fas fa-envelope"></i> Unread
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                <div class="info-item">
+                    <label><i class="fas fa-user"></i> From:</label>
+                    <span>{{ message.name }}</span>
+                </div>
+                <div class="info-item">
+                    <label><i class="fas fa-envelope"></i> Email:</label>
+                    <a href="mailto:{{ message.email }}" style="color: #4a90e2; text-decoration: none;">
+                        {{ message.email }}
+                    </a>
+                </div>
+                <div class="info-item">
+                    <label><i class="fas fa-tag"></i> Subject:</label>
+                    <span>{{ message.subject }}</span>
+                </div>
+                <div class="info-item">
+                    <label><i class="fas fa-calendar"></i> Date:</label>
+                    <span>{{ message.date_submitted.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                </div>
+            </div>
+            
+            {% if message.is_read and message.read_at %}
+            <div class="info-item" style="margin-bottom: 20px;">
+                <label><i class="fas fa-eye"></i> Read At:</label>
+                <span>{{ message.read_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+            </div>
+            {% endif %}
+            
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+            
+            <div class="info-item">
+                <label><i class="fas fa-comment"></i> Message:</label>
+                <div style="background: #f8f8f8; border: 1px solid #ddd; border-radius: 10px; padding: 20px; margin-top: 10px; color: #333; line-height: 1.6; white-space: pre-wrap;">{{ message.message }}</div>
+            </div>
+        </div>
+        
+        <!-- Actions and Info Cards -->
+        <div>
+            <!-- Actions Card -->
+            <div class="admin-card" style="margin-bottom: 30px;">
+                <h3><i class="fas fa-cogs"></i> Actions</h3>
+                
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- Reply via Email -->
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to={{ message.email }}&su=Re: {{ message.subject | urlencode }}" 
+                       target="_blank" class="btn-admin w-100" style="background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);">
+                        <i class="fab fa-google"></i>
+                        Reply via Gmail
+                    </a>
+                    
+                    <!-- Back to Messages -->
+                    <a href="{{ url_for('admin_messages') }}" class="btn-admin btn-secondary w-100">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Messages
+                    </a>
+                    
+                    <!-- Delete Message -->
+                    <form method="POST" action="{{ url_for('delete_message', id=message.id) }}" 
+                          onsubmit="return confirm('Are you sure you want to delete this message? This action cannot be undone.')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <button type="submit" class="btn-admin w-100" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
+                            <i class="fas fa-trash"></i>
+                            Delete Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Message Info Card -->
+            <div class="admin-card">
+                <h3><i class="fas fa-info-circle"></i> Message Info</h3>
+                
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div class="info-item">
+                        <label>Message ID:</label>
+                        <span>#{{ message.id }}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Status:</label>
+                        <span class="badge {% if message.is_read %}badge-success{% else %}badge-warning{% endif %}">
+                            {% if message.is_read %}Read{% else %}Unread{% endif %}
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <label>Submitted:</label>
+                        <span>{{ message.date_submitted.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                    </div>
+                    {% if message.is_read and message.read_at %}
+                    <div class="info-item">
+                        <label>Read At:</label>
+                        <span>{{ message.read_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Confirm delete action
+document.querySelector('form[onsubmit*="confirm"]').addEventListener('submit', function(e) {
+    if (!confirm('Are you sure you want to delete this message? This action cannot be undone.')) {
+        e.preventDefault();
+    }
+});
+
+// Auto-focus on reply button for keyboard navigation
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'r' && e.ctrlKey) {
+        e.preventDefault();
+        document.querySelector('a[href^="mailto:"]').click();
+    }
+});
+</script>
+{% endblock %}

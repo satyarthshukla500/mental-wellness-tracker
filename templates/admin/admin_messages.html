@@ -1,0 +1,196 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Messages - Admin Panel - MindSpace{% endblock %}
+
+{% block content %}
+<div class="messages-content">
+    <!-- Search and Stats -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 30px;">
+        <div class="admin-card">
+            <h3><i class="fas fa-search"></i> Search & Filter</h3>
+            <form method="GET" style="display: flex; gap: 15px; align-items: end; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 200px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #666;">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="all" {% if request.args.get('status') == 'all' %}selected{% endif %}>All Messages</option>
+                        <option value="unread" {% if request.args.get('status') == 'unread' %}selected{% endif %}>Unread Only</option>
+                        <option value="read" {% if request.args.get('status') == 'read' %}selected{% endif %}>Read Only</option>
+                    </select>
+                </div>
+                <div style="flex: 2; min-width: 250px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #666;">Search</label>
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="Search by name, email, or subject..."
+                           value="{{ request.args.get('search', '') }}">
+                </div>
+                <div>
+                    <button type="submit" class="btn-admin">
+                        <i class="fas fa-search"></i>
+                        Search
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="admin-card text-center">
+            <h3><i class="fas fa-chart-bar"></i> Total Messages</h3>
+            <div class="stats-number" style="font-size: 48px; margin: 20px 0;">{{ messages.total }}</div>
+        </div>
+    </div>
+    
+    <!-- Messages Table -->
+    <div class="admin-card">
+        <h3><i class="fas fa-envelope"></i> Contact Messages</h3>
+        
+        {% if messages.items %}
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Subject</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for message in messages.items %}
+                    <tr style="{% if not message.is_read %}background: rgba(255,193,7,0.05);{% endif %}">
+                        <td>
+                            {% if message.is_read %}
+                            <span class="badge badge-success">
+                                <i class="fas fa-check"></i> Read
+                            </span>
+                            {% else %}
+                            <span class="badge badge-warning">
+                                <i class="fas fa-envelope"></i> Unread
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ message.name }}</strong>
+                        </td>
+                        <td>
+                            <a href="mailto:{{ message.email }}" style="color: #4a90e2; text-decoration: none;">
+                                {{ message.email }}
+                            </a>
+                        </td>
+                        <td>
+                            <span title="{{ message.subject }}" style="max-width: 200px; display: inline-block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                {{ message.subject[:50] }}{% if message.subject|length > 50 %}...{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <div style="font-size: 14px; line-height: 1.4;">
+                                {{ message.date_submitted.strftime('%Y-%m-%d') }}<br>
+                                <small style="color: #666;">{{ message.date_submitted.strftime('%H:%M') }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 5px;">
+                                <a href="{{ url_for('admin_message_detail', id=message.id) }}" 
+                                   class="btn-admin btn-sm" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('toggle_message_read', id=message.id) }}" 
+                                      style="display: inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button type="submit" class="btn-admin btn-sm btn-{% if message.is_read %}warning{% else %}success{% endif %}" 
+                                            title="{% if message.is_read %}Mark as Unread{% else %}Mark as Read{% endif %}">
+                                        <i class="fas fa-{% if message.is_read %}envelope{% else %}envelope-open{% endif %}"></i>
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ url_for('delete_message', id=message.id) }}" 
+                                      style="display: inline;" 
+                                      onsubmit="return confirm('Are you sure you want to delete this message?')">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button type="submit" class="btn-admin btn-sm btn-danger" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if messages.pages > 1 %}
+        <div class="pagination">
+            {% if messages.has_prev %}
+            <a class="page-link" href="{{ url_for('admin_messages', page=messages.prev_num, status=request.args.get('status'), search=request.args.get('search')) }}">
+                <i class="fas fa-chevron-left"></i> Previous
+            </a>
+            {% endif %}
+            
+            {% for page_num in messages.iter_pages() %}
+                {% if page_num %}
+                    {% if page_num != messages.page %}
+                    <a class="page-link" href="{{ url_for('admin_messages', page=page_num, status=request.args.get('status'), search=request.args.get('search')) }}">
+                        {{ page_num }}
+                    </a>
+                    {% else %}
+                    <span class="page-link" style="background: #4a90e2; color: white; border-color: #4a90e2;">{{ page_num }}</span>
+                    {% endif %}
+                {% else %}
+                <span class="page-link" style="background: #f8f8f8; color: #ccc; border-color: #eee;">...</span>
+                {% endif %}
+            {% endfor %}
+            
+            {% if messages.has_next %}
+            <a class="page-link" href="{{ url_for('admin_messages', page=messages.next_num, status=request.args.get('status'), search=request.args.get('search')) }}">
+                Next <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h4>No messages found</h4>
+            <p>{% if request.args.get('search') or request.args.get('status') != 'all' %}
+                No messages match your current filters. Try adjusting your search criteria.
+            {% else %}
+                No contact messages have been submitted yet.
+            {% endif %}</p>
+            {% if request.args.get('search') or request.args.get('status') != 'all' %}
+            <a href="{{ url_for('admin_messages') }}" class="btn-admin">
+                <i class="fas fa-refresh"></i>
+                Clear Filters
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Auto-submit form on status change
+document.querySelector('select[name="status"]').addEventListener('change', function() {
+    this.form.submit();
+});
+
+// Auto-submit search form on Enter key
+document.querySelector('input[name="search"]').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        this.form.submit();
+    }
+});
+
+// Confirm delete actions
+document.querySelectorAll('form[onsubmit*="confirm"]').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        if (!confirm('Are you sure you want to delete this message? This action cannot be undone.')) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

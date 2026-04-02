@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}About Us - MindSpace{% endblock %}
+
+{% block extra_head %}
+<style>
+    .coming-soon-badge {
+        background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 12px;
+        margin-left: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 4px rgba(255, 167, 38, 0.3);
+        display: inline-block;
+        vertical-align: middle;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="about-page">
+    <div class="main-content">
+        <div class="main-container">
+            <!-- Hero Section -->
+            <div class="about-hero">
+                <h1>About MindSpace</h1>
+                <p>Your personal mental wellness companion, designed to help you track, understand, and improve your emotional well-being through mindful reflection and data-driven insights.</p>
+            </div>
+
+            <!-- Mission Statement -->
+            <div class="about-section">
+                <div class="card">
+                    <div class="card-body">
+                        <h2>Our Mission</h2>
+                        <p>At MindSpace, we believe that mental wellness is a journey, not a destination. Our mission is to provide you with the tools and insights you need to understand your emotional patterns, build healthy habits, and create a more mindful approach to your daily life.</p>
+                        <p>We're committed to making mental wellness tracking accessible, private, and meaningful for everyone, regardless of where you are in your wellness journey.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Core Values -->
+            <div class="about-section">
+                <div class="card">
+                    <div class="card-body">
+                        <h2>Our Core Values</h2>
+                        <div class="about-features">
+                            <div class="feature-item">
+                                <h3><i class="fas fa-shield-alt"></i> Privacy First</h3>
+                                <p>Your mental wellness data is yours alone. We prioritize your privacy and security, ensuring your personal reflections remain confidential and secure.</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3><i class="fas fa-heart"></i> Compassionate Design</h3>
+                                <p>Every feature is designed with empathy and understanding. We recognize that mental wellness is deeply personal and deserves a gentle, supportive approach.</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3><i class="fas fa-chart-line"></i> Data-Driven Insights</h3>
+                                <p>Transform your daily reflections into meaningful insights. Our analytics help you identify patterns and trends in your emotional well-being over time.</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3><i class="fas fa-users"></i> Accessible to All</h3>
+                                <p>Mental wellness support should be available to everyone. MindSpace is designed to be intuitive, inclusive, and supportive for users of all backgrounds.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Features -->
+            <div class="about-section">
+                <div class="card">
+                    <div class="card-body">
+                        <h2>Key Features</h2>
+                        <div class="about-features">
+                            <div class="feature-item">
+                                <h3><i class="fas fa-calendar-check"></i> Daily Mood Tracking</h3>
+                                <p>Record your daily emotional state with our intuitive mood tracking system. Choose from predefined moods or create custom entries that reflect your unique experience.</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3><i class="fas fa-journal-whills"></i> Personal Journaling</h3>
+                                <p>Add detailed notes and reflections to your entries. Capture the context, thoughts, and experiences that shape your emotional landscape.</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3><i class="fas fa-chart-pie"></i> Visual Analytics</h3>
+                                <p>View your wellness journey through beautiful charts and graphs. Understand your mood patterns, identify trends, and celebrate your progress.</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3><i class="fas fa-bell"></i> Gentle Reminders</h3>
+                                <p>Set up personalized reminders to help you maintain a consistent wellness practice. Choose the timing and frequency that works best for your lifestyle.</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3><i class="fas fa-lightbulb"></i> Personalized Tips</h3>
+                                <p>Receive tailored wellness suggestions based on your mood patterns and entries. Our intelligent system provides relevant, actionable advice for your unique situation.</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3><i class="fas fa-download"></i> Data Export</h3>
+                                <p>Your data belongs to you. Export your wellness entries and insights in CSV format for your own analysis or to share with healthcare providers.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How It Works -->
+            <div class="about-section">
+                <div class="card">
+                    <div class="card-body">
+                        <h2>How MindSpace Works</h2>
+                        <div class="about-features">
+                            <div class="feature-item">
+                                <h3><i class="fas fa-user-plus"></i> 1. Create Your Account</h3>
+                                <p>Sign up for a free account and set up your profile. Your information is secure and private, and you can start tracking immediately.</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3><i class="fas fa-plus-circle"></i> 2. Add Daily Entries</h3>
+                                <p>Each day, take a moment to reflect on your emotional state. Add your mood, any notes about your day, and let MindSpace help you build awareness.</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3><i class="fas fa-chart-bar"></i> 3. Review Your Insights</h3>
+                                <p>Visit your dashboard to see your mood patterns, trends, and personalized wellness tips. Watch as your data tells the story of your wellness journey.</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3><i class="fas fa-seedling"></i> 4. Grow and Improve</h3>
+                                <p>Use your insights to make informed decisions about your mental wellness. Build healthy habits, recognize patterns, and celebrate your progress.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Benefits -->
+            <div class="about-section">
+                <div class="card">
+                    <div class="card-body">
+                        <h2>Benefits for You</h2>
+                        <div class="about-features">
+                            <div class="feature-item">
+                                <h3><i class="fas fa-brain"></i> Increased Self-Awareness</h3>
+                                <p>Regular mood tracking helps you become more aware of your emotional patterns, triggers, and the factors that influence your well-being.</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3><i class="fas fa-target"></i> Goal Setting & Achievement <span class="coming-soon-badge">Coming Soon</span></h3>
+                                <p>Coming soon! Set personal wellness goals and track your progress in MindSpace. Celebrate milestones and stay motivated on your mental wellness journey.</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3><i class="fas fa-handshake"></i> Better Communication</h3>
+                                <p>Understanding your emotional patterns helps you communicate more effectively with loved ones, healthcare providers, and support systems.</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3><i class="fas fa-leaf"></i> Stress Management</h3>
+                                <p>Identify stress patterns and develop coping strategies. MindSpace helps you recognize early warning signs and take proactive steps.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="about-section">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h2>Ready to Start Your Wellness Journey?</h2>
+                        <p>Join thousands of users who are already using MindSpace to improve their mental wellness and build healthier habits.</p>
+                        <div class="about-cta">
+                            {% if session.get('user_id') %}
+                                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg me-3">
+                                    <i class="fas fa-chart-line me-2"></i>Go to Dashboard
+                                </a>
+                                <a href="{{ url_for('add_entry') }}" class="btn btn-success btn-lg me-3">
+                                    <i class="fas fa-plus me-2"></i>Add Entry
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-3">
+                                    <i class="fas fa-user-plus me-2"></i>Get Started
+                                </a>
+                                <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg me-3">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                                </a>
+                            {% endif %}
+                            <a href="{{ url_for('home') }}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-home me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact & Support -->
+            <div class="about-section">
+                <div class="card">
+                    <div class="card-body">
+                        <h2>Contact & Support</h2>
+                        <p>We're here to help you on your wellness journey. If you have questions, feedback, or need support, we'd love to hear from you.</p>
+                        <div class="about-features">
+                            <div class="feature-item">
+                                <h3><i class="fas fa-envelope"></i> General Inquiries</h3>
+                                <p>For general questions about MindSpace, feature requests, or feedback, please reach out through our support channels.</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3><i class="fas fa-bug"></i> Technical Support</h3>
+                                <p>Experiencing technical issues? Our support team is ready to help you resolve any problems and get back to tracking your wellness.</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3><i class="fas fa-lightbulb"></i> Feature Suggestions</h3>
+                                <p>Have ideas for new features? We're always looking to improve MindSpace based on user feedback and suggestions.</p>
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <p class="text-muted">
+                                <i class="fas fa-heart text-danger me-1"></i>
+                                Built with care for your mental wellness journey
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
