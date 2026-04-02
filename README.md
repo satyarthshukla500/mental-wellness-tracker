@@ -113,7 +113,6 @@ The app will be live at `http://127.0.0.1:5000`
 - Tanishq
 
 **Subject:** Web Technologies Lab (Flask Project)  
-**Grade:** 84% — Prof. Dinesh Patel
 
 ---
 
