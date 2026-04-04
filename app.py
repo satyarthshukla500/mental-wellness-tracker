@@ -1770,6 +1770,7 @@ def create_admin_if_not_exists():
             print("✅ Admin user created: username='admin', password='admin123'")
             print("⚠️  WARNING: Change admin credentials in production!")
 
+create_admin_if_not_exists()
+
 if __name__ == '__main__':
-    create_admin_if_not_exists()
     app.run(debug=True)
