@@ -2322,7 +2322,44 @@ body.profile-page {
         margin-right: 0;
         border-radius: var(--border-radius-md);
     }
+
+    @media (max-width: 991.98px) {
+    .dashboard-page .main-content {
+        overflow-x: clip !important;
+    }
 }
+}
+
+
+
+.mobile-menu-fab {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1100;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: rgba(108, 99, 255, 0.92);
+    color: #fff;
+    border: none;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 20px rgba(108, 99, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mobile-menu-fab:active {
+    transform: scale(0.92);
+    background: rgba(90, 82, 224, 0.95);
+}
+
+
+
 
 /* Full-page background styles for login/register */
 .full-page-bg {
