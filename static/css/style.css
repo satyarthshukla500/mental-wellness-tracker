@@ -183,6 +183,19 @@ h1, h2, h3, .brand-name, .hero-title {
 }
 
 /* Top Bar for Mobile */
+
+.top-bar .btn-outline-primary {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.top-bar .btn-outline-primary:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border-color: #fff;
+}
+
+
 .top-bar {
     background-color: var(--primary-color);
     color: var(--text-light);
