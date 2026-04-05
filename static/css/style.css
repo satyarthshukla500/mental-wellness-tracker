@@ -1792,6 +1792,11 @@ body.dashboard-page {
         padding: var(--spacing-md);
     }
     
+    .dashboard-page .main-content {
+        margin-left: 0 !important;
+        width: 100vw !important;
+    }
+    
     .dashboard-page .card,
     .dashboard-page .analytics-section,
     .dashboard-page .filter-section,
