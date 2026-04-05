@@ -2330,7 +2330,17 @@ body.profile-page {
 }
 }
 
+/* Hide FAB when sidebar is open so it doesn't overlap logo */
+.sidebar.show ~ .mobile-menu-fab {
+    display: none;
+}
 
+/* Push content down on mobile so notifications don't hide behind FAB */
+@media (max-width: 991.98px) {
+    .content-wrapper {
+        padding-top: 4rem;
+    }
+}
 
 .mobile-menu-fab {
     position: fixed;
