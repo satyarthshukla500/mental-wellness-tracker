@@ -2302,6 +2302,26 @@ body.profile-page {
         background: rgba(255, 255, 255, 0.20);
         backdrop-filter: blur(15px);
     }
+
+    .dashboard-page .content-wrapper {
+        padding: var(--spacing-sm);
+    }
+
+    .dashboard-page .main-container {
+        padding: var(--spacing-sm);
+    }
+
+    .chart-container canvas {
+        height: 220px !important;
+    }
+
+    .dashboard-page .card,
+    .dashboard-page .analytics-section,
+    .dashboard-page .chart-container {
+        margin-left: 0;
+        margin-right: 0;
+        border-radius: var(--border-radius-md);
+    }
 }
 
 /* Full-page background styles for login/register */
